@@ -107,6 +107,8 @@ public class PlayerStats {
 
     private Date recordedDate;
 
+    private Date updatedDate;
+
     @Setter
     private int playerLevel;
 
@@ -268,5 +270,22 @@ public class PlayerStats {
     @DimensionFormula("CASE WHEN {{country.inUsa}} THEN 'true' ELSE 'false' END")
     public String getCountryIsInUsa() {
         return countryIsInUsa;
+    }
+
+    /**
+     * <b>DO NOT put {@link Cardinality} annotation on this field</b>. See
+     *
+     * @return the date of the player session.
+     */
+    @Temporal(grains = {
+            @TimeGrainDefinition(grain = TimeGrain.DAY, expression = DAY_FORMAT),
+            @TimeGrainDefinition(grain = TimeGrain.MONTH, expression = MONTH_FORMAT)
+    }, timeZone = "UTC")
+    public Date getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(final Date updatedDate) {
+        this.updatedDate = updatedDate;
     }
 }
