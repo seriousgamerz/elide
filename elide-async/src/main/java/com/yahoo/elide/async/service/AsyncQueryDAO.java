@@ -51,4 +51,6 @@ public interface AsyncQueryDAO {
     public Collection<AsyncQuery> updateStatusAsyncQueryCollection(String filterExpression,
             QueryStatus status);
 
+    public Collection<AsyncQuery> getAsyncQueryAndResultCollection();
+
 }

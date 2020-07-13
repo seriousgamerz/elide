@@ -195,4 +195,24 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
         }
         return result;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<AsyncQuery> getAsyncQueryAndResultCollection() {
+        Collection<AsyncQuery> asyncQueryList = null;
+        try {
+            asyncQueryList = (Collection<AsyncQuery>) executeInTransaction(dataStore, (tx, scope) -> {
+
+                EntityProjection asyncQueryCollection = EntityProjection.builder()
+                        .type(AsyncQuery.class)
+                        .build();
+                Iterable<Object> loaded = tx.loadObjects(asyncQueryCollection, scope);
+                return loaded;
+            });
+        } catch (Exception e) {
+            log.error("Exception: {}", e);
+        }
+        System.out.println(asyncQueryList);
+        return asyncQueryList;
+    }
 }

@@ -26,7 +26,7 @@ public class AsyncCleanerService {
 
     private final int defaultCleanupDelayMinutes = 360;
     private final int maxCleanupInitialDelayMinutes = 100;
-
+    private final int defaultCancelDelayMinutes = 5;
     private static AsyncCleanerService asyncCleanerService = null;
 
     @Inject
@@ -52,6 +52,17 @@ public class AsyncCleanerService {
         //interrupt process.
         cleaner.scheduleWithFixedDelay(cleanUpTask, initialDelayMinutes, Math.max(defaultCleanupDelayMinutes,
                 queryRunTimeThresholdMinutes), TimeUnit.MINUTES);
+
+        //Setting up query cancel service that cancels long running queries
+        ScheduledExecutorService cancellation = Executors.newSingleThreadScheduledExecutor();
+
+        AsyncQueryCancelThread cancelTask = new AsyncQueryCancelThread(maxRunTimeMinutes, elide, asyncQueryDao);
+
+        Random randomCancel = new Random();
+        int initCancelMinutes = randomCancel.ints(0, maxCleanupInitialDelayMinutes).limit(1).findFirst().getAsInt();
+        log.debug("Initial Delay for cancel service is {}", initCancelMinutes);
+
+        cancellation.scheduleWithFixedDelay(cancelTask, initCancelMinutes, defaultCancelDelayMinutes, TimeUnit.MINUTES);
     }
 
     /**
