@@ -44,43 +44,43 @@ public class AsyncQueryCancelThread implements Runnable {
      * */
     protected void cancelAsyncQuery() {
 
-    try {
-        TransactionRegistry transactionRegistry = elide.getTransactionRegistry();
-        //System.out.println(transactionRegistry.toString());
-        Collection<AsyncQuery> asyncQueryList = asyncQueryDao.getAsyncQueryAndResultCollection();
-        for (AsyncQuery obj : asyncQueryList) {
-            System.out.println(System.currentTimeMillis() + " ******** Async " + obj.getId()
-                    + " *** " + obj.getRequestId());
-            UUID uuid = UUID.nameUUIDFromBytes(obj.getRequestId().getBytes());
-            System.out.println(System.currentTimeMillis() + " **** running transaction "
-                    + transactionRegistry.getRunningTransaction(uuid));
+        try {
+            TransactionRegistry transactionRegistry = elide.getTransactionRegistry();
+            //System.out.println(transactionRegistry.toString());
+            Collection<AsyncQuery> asyncQueryList = asyncQueryDao.getAsyncQueryAndResultCollection();
+            for (AsyncQuery obj : asyncQueryList) {
+                System.out.println(System.currentTimeMillis() + " ******** Async " + obj.getId()
+                        + " *** " + obj.getRequestId());
+                UUID uuid = UUID.nameUUIDFromBytes(obj.getRequestId().getBytes());
+                System.out.println(System.currentTimeMillis() + " **** running transaction "
+                        + transactionRegistry.getRunningTransaction(uuid));
 
-            Map<UUID, DataStoreTransaction> runningTransactionMap = transactionRegistry.getTransactionMap();
+                Map<UUID, DataStoreTransaction> runningTransactionMap = transactionRegistry.getTransactionMap();
 
-            System.out.println(System.currentTimeMillis() + "runningTransactionMap " + runningTransactionMap);
+                System.out.println(System.currentTimeMillis() + "runningTransactionMap " + runningTransactionMap);
 
-            for (Map.Entry<UUID, DataStoreTransaction> entry : runningTransactionMap.entrySet()) {
-                System.out.println(System.currentTimeMillis() + " ******** To be Cancelled" + obj.getId());
-                System.out.println(obj.getRequestId().trim());
-                System.out.println(entry.getKey().toString().trim());
-                if (obj.getRequestId().trim().equals(entry.getKey().toString().trim())) {
-                    Date currentDate = new Date(System.currentTimeMillis());
-                    long diffInMillies = Math.abs(obj.getUpdatedOn().getTime() - currentDate.getTime());
-                    long diffInSecs = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-                    if (obj.getStatus().equals(QueryStatus.CANCELLED)) {
-                        System.out.println(System.currentTimeMillis() + " ******** Cancelled " + obj.getId());
-                        entry.getValue().cancel();
-                    } else if (diffInSecs >= maxRunTimeSeconds) {
-                        System.out.println(System.currentTimeMillis() + " ******** Cancelled " + obj.getId()
-                        + entry.getValue());
-                        entry.getValue().cancel();
-                        transactionRegistry.removeRunningTransaction(entry.getKey());
+                for (Map.Entry<UUID, DataStoreTransaction> entry : runningTransactionMap.entrySet()) {
+                    System.out.println(System.currentTimeMillis() + " ******** To be Cancelled" + obj.getId());
+                    System.out.println(obj.getRequestId().trim());
+                    System.out.println(entry.getKey().toString().trim());
+                    if (obj.getRequestId().trim().equals(entry.getKey().toString().trim())) {
+                        Date currentDate = new Date(System.currentTimeMillis());
+                        long diffInMillies = Math.abs(obj.getUpdatedOn().getTime() - currentDate.getTime());
+                        long diffInSecs = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                        if (obj.getStatus().equals(QueryStatus.CANCELLED)) {
+                            System.out.println(System.currentTimeMillis() + " ******** Cancelled " + obj.getId());
+                            entry.getValue().cancel();
+                        } else if (diffInSecs >= maxRunTimeSeconds) {
+                            System.out.println(System.currentTimeMillis() + " ******** Cancelled " + obj.getId()
+                            + entry.getValue());
+                            entry.getValue().cancel();
+                            transactionRegistry.removeRunningTransaction(entry.getKey());
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
     }
 }

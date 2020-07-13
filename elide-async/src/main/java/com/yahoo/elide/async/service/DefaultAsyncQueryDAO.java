@@ -202,7 +202,6 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
     @SuppressWarnings("unchecked")
     public Collection<AsyncQuery> getAsyncQueryAndResultCollection() {
         Collection<AsyncQuery> asyncQueryList = null;
-
         try {
             asyncQueryList = (Collection<AsyncQuery>) executeInTransaction(dataStore, (tx, scope) -> {
 
@@ -217,6 +216,7 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             e.printStackTrace();
             log.error("Exception: {}", e);
         }
+        System.out.println(asyncQueryList);
         return asyncQueryList;
     }
 }

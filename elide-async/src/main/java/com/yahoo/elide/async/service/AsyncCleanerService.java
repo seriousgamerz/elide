@@ -58,6 +58,7 @@ public class AsyncCleanerService {
         AsyncQueryCancelThread cancelTask = new AsyncQueryCancelThread(maxRunTimeSeconds, elide, asyncQueryDao);
 
         cancellation.scheduleWithFixedDelay(cancelTask, 10, cancelDelaySeconds, TimeUnit.SECONDS);
+
     }
 
     /**
