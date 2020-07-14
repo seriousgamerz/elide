@@ -216,7 +216,6 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             e.printStackTrace();
             log.error("Exception: {}", e);
         }
-        System.out.println(asyncQueryList);
         return asyncQueryList;
     }
 }
