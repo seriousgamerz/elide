@@ -212,7 +212,6 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
         } catch (Exception e) {
             log.error("Exception: {}", e);
         }
-        System.out.println(asyncQueryList);
         return asyncQueryList;
     }
 }

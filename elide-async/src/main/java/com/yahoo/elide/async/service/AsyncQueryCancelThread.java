@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class AsyncQueryCancelThread implements Runnable {
 
-    private int maxRunTimeMinutes;
+    private int maxRunTimeSeconds;
     private Elide elide;
     private AsyncQueryDAO asyncQueryDao;
 
@@ -49,14 +49,15 @@ public class AsyncQueryCancelThread implements Runnable {
         Collection<AsyncQuery> asyncQueryList = asyncQueryDao.getAsyncQueryAndResultCollection();
         for (AsyncQuery obj : asyncQueryList) {
             for (Map.Entry<UUID, DataStoreTransaction> entry : runningTransactionMap.entrySet()) {
-                if (obj.getRequestId().contentEquals(entry.getKey().toString())) {
+                if (obj.getRequestId().trim().equals(entry.getKey().toString().trim())) {
                     Date currentDate = new Date(System.currentTimeMillis());
                     long diffInMillies = Math.abs(obj.getUpdatedOn().getTime() - currentDate.getTime());
-                    long diffInMins = TimeUnit.MINUTES.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                    long diffInSecs = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
                     if (obj.getStatus().equals(QueryStatus.CANCELLED)) {
                         entry.getValue().cancel();
-                    } else if (diffInMins > maxRunTimeMinutes) {
+                    } else if (diffInSecs >= maxRunTimeSeconds) {
                         entry.getValue().cancel();
+                        transactionRegistry.removeRunningTransaction(entry.getKey());
                     }
                 }
             }

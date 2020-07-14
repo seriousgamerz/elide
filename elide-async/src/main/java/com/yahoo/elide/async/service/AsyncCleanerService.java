@@ -26,15 +26,14 @@ public class AsyncCleanerService {
 
     private final int defaultCleanupDelayMinutes = 360;
     private final int maxCleanupInitialDelayMinutes = 100;
-    private final int defaultCancelDelayMinutes = 5;
     private static AsyncCleanerService asyncCleanerService = null;
 
     @Inject
-    private AsyncCleanerService(Elide elide, Integer maxRunTimeMinutes, Integer queryCleanupDays,
-            AsyncQueryDAO asyncQueryDao) {
+    private AsyncCleanerService(Elide elide, Integer maxRunTimeSeconds, Integer queryCleanupDays,
+            Integer cancelDelaySeconds, AsyncQueryDAO asyncQueryDao) {
 
         //If query is still running for twice than maxRunTime, then interrupt did not work due to host/app crash.
-        int queryRunTimeThresholdMinutes = maxRunTimeMinutes * 2;
+        int queryRunTimeThresholdMinutes = (maxRunTimeSeconds * 2) / 60;
 
         // Setting up query cleaner that marks long running query as TIMEDOUT.
         ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor();
@@ -56,27 +55,25 @@ public class AsyncCleanerService {
         //Setting up query cancel service that cancels long running queries
         ScheduledExecutorService cancellation = Executors.newSingleThreadScheduledExecutor();
 
-        AsyncQueryCancelThread cancelTask = new AsyncQueryCancelThread(maxRunTimeMinutes, elide, asyncQueryDao);
+        AsyncQueryCancelThread cancelTask = new AsyncQueryCancelThread(maxRunTimeSeconds, elide, asyncQueryDao);
 
-        Random randomCancel = new Random();
-        int initCancelMinutes = randomCancel.ints(0, maxCleanupInitialDelayMinutes).limit(1).findFirst().getAsInt();
-        log.debug("Initial Delay for cancel service is {}", initCancelMinutes);
-
-        cancellation.scheduleWithFixedDelay(cancelTask, initCancelMinutes, defaultCancelDelayMinutes, TimeUnit.MINUTES);
+        cancellation.scheduleWithFixedDelay(cancelTask, 0, cancelDelaySeconds, TimeUnit.SECONDS);
     }
 
     /**
      * Initialize the singleton AsyncCleanerService object.
      * If already initialized earlier, no new object is created.
      * @param elide Elide Instance
-     * @param maxRunTimeMinutes max run times in minutes
+     * @param maxRunTimeSeconds max run times in seconds
      * @param queryCleanupDays Async Query Clean up days
+     * @param cancelDelaySeconds Async Query Transaction cancel delay
      * @param asyncQueryDao DAO Object
      */
-    public static void init(Elide elide, Integer maxRunTimeMinutes, Integer queryCleanupDays,
-            AsyncQueryDAO asyncQueryDao) {
+    public static void init(Elide elide, Integer maxRunTimeSeconds, Integer queryCleanupDays,
+            Integer cancelDelaySeconds, AsyncQueryDAO asyncQueryDao) {
         if (asyncCleanerService == null) {
-            asyncCleanerService = new AsyncCleanerService(elide, maxRunTimeMinutes, queryCleanupDays, asyncQueryDao);
+            asyncCleanerService = new AsyncCleanerService(elide, maxRunTimeSeconds, queryCleanupDays,
+                    cancelDelaySeconds, asyncQueryDao);
         } else {
             log.debug("asyncCleanerService is already initialized.");
         }

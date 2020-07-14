@@ -52,7 +52,7 @@ public class AsyncQueryCancelThreadTest {
     public void testAsyncQueryCancelThreadSet() {
         assertEquals(elide, cancelThread.getElide());
         assertEquals(asyncQueryDao, cancelThread.getAsyncQueryDao());
-        assertEquals(7, cancelThread.getMaxRunTimeMinutes());
+        assertEquals(7, cancelThread.getMaxRunTimeSeconds());
     }
 
     @Test
