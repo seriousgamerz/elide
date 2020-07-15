@@ -163,6 +163,7 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
                     .type(AsyncQuery.class)
                     .build();
             AsyncQuery query = (AsyncQuery) tx.loadObject(asyncQueryCollection, asyncQueryId, scope);
+
             query.setResult(asyncQueryResult);
             query.setStatus(QueryStatus.COMPLETE);
             tx.save(query, scope);
@@ -186,6 +187,7 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<String, String>();
             RequestScope scope = new RequestScope("query", NO_VERSION, jsonApiDoc,
                     tx, null, queryParams, UUID.randomUUID(), elide.getElideSettings());
+
             result = action.execute(tx, scope);
             tx.flush(scope);
             tx.commit(scope);
@@ -200,16 +202,19 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
     @SuppressWarnings("unchecked")
     public Collection<AsyncQuery> getAsyncQueryAndResultCollection() {
         Collection<AsyncQuery> asyncQueryList = null;
+
         try {
             asyncQueryList = (Collection<AsyncQuery>) executeInTransaction(dataStore, (tx, scope) -> {
 
                 EntityProjection asyncQueryCollection = EntityProjection.builder()
                         .type(AsyncQuery.class)
                         .build();
+                //System.out.println("*** getAsyncQueryAndResultCollection "+ asyncQueryCollection);
                 Iterable<Object> loaded = tx.loadObjects(asyncQueryCollection, scope);
                 return loaded;
             });
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Exception: {}", e);
         }
         return asyncQueryList;
