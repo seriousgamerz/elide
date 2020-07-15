@@ -235,6 +235,15 @@ public interface ElideStandaloneSettings {
     }
 
     /**
+     * Number of seconds  between async query cancellation checks
+     *
+     * @return Default: 300
+     */
+    default Integer getAsyncQueryCancelDelaySeconds() {
+        return 300;
+    }
+
+    /**
      * Implementation of AsyncQueryDAO to use.
      *
      * @return AsyncQueryDAO type object.

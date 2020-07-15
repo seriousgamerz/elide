@@ -34,6 +34,11 @@ public class AsyncProperties extends ControllerProperties {
     private int queryCleanupDays = 7;
 
     /**
+     * Default cancel interval of async query.
+     */
+    private int queryCancellationSeconds = 300;
+
+    /**
      * Whether or not to use the default implementation of AsyncQueryDAO.
      * If false, the user will provide custom implementation of AsyncQueryDAO.
      */
