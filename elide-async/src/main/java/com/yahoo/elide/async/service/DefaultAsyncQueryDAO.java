@@ -200,20 +200,26 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Collection<AsyncQuery> getAsyncQueryAndResultCollection() {
+    public Collection<AsyncQuery> getActiveAsyncQueryCollection() {
         Collection<AsyncQuery> asyncQueryList = null;
+
+        log.debug("getActiveAsyncQueryCollection");
+        String filterExpression = "status=in=(" + QueryStatus.PROCESSING.toString() + ","
+                + QueryStatus.QUEUED.toString() + ")";
+
         try {
+            FilterExpression filter = filterParser.parseFilterExpression(filterExpression,
+                     AsyncQuery.class, false);
             asyncQueryList = (Collection<AsyncQuery>) executeInTransaction(dataStore, (tx, scope) -> {
 
                 EntityProjection asyncQueryCollection = EntityProjection.builder()
                         .type(AsyncQuery.class)
+                        .filterExpression(filter)
                         .build();
-                //System.out.println("*** getAsyncQueryAndResultCollection "+ asyncQueryCollection);
                 Iterable<Object> loaded = tx.loadObjects(asyncQueryCollection, scope);
                 return loaded;
             });
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Exception: {}", e);
         }
         return asyncQueryList;

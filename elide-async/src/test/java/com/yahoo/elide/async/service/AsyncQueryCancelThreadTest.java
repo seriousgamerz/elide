@@ -45,19 +45,21 @@ public class AsyncQueryCancelThreadTest {
 
         asyncQueryDao = mock(DefaultAsyncQueryDAO.class);
         transactionRegistry = mock(TransactionRegistry.class);
-        cancelThread = new AsyncQueryCancelThread(7, elide, asyncQueryDao);
+        cancelThread = new AsyncQueryCancelThread(7, elide, asyncQueryDao, transactionRegistry);
     }
 
     @Test
     public void testAsyncQueryCancelThreadSet() {
         assertEquals(elide, cancelThread.getElide());
         assertEquals(asyncQueryDao, cancelThread.getAsyncQueryDao());
+        assertEquals(transactionRegistry, cancelThread.getTransactionRegistry());
         assertEquals(7, cancelThread.getMaxRunTimeSeconds());
     }
 
     @Test
     public void testCancelAsyncQuery() {
         cancelThread.cancelAsyncQuery();
-        verify(asyncQueryDao, times(1)).getAsyncQueryAndResultCollection();
+        verify(asyncQueryDao, times(1)).getActiveAsyncQueryCollection();
+        verify(transactionRegistry, times(1)).getTransactionMap();
     }
 }

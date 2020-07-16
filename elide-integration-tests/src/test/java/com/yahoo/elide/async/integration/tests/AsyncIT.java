@@ -643,64 +643,6 @@ public class AsyncIT extends IntegrationTest {
         }
     }
     /**
-     * Cancel Async Query Test
-     * @throws InterruptedException
-     */
-    @Test
-    public void cancelAsyncQueryByTime() throws InterruptedException {
-
-        AsyncDelayStoreTransaction.sleep = true;
-
-        //Create Async Request
-        given()
-                .contentType(JSONAPI_CONTENT_TYPE)
-                .body(
-                        data(
-                                resource(
-                                        type("asyncQuery"),
-                                        id("edc4a871-dff2-4054-804e-d80075cf830f"),
-                                        attributes(
-                                                attr("query", "/book?sort=genre&fields%5Bbook%5D=title"),
-                                                attr("queryType", "JSONAPI_V1_0"),
-                                                attr("status", "QUEUED"),
-                                                attr("asyncAfterSeconds", "0")
-                                        )
-                                )
-                        ).toJSON())
-                .when()
-                .post("/asyncQuery")
-                .then()
-                .statusCode(org.apache.http.HttpStatus.SC_CREATED)
-                .body("data.id", equalTo("edc4a871-dff2-4054-804e-d80075cf830f"))
-                .body("data.type", equalTo("asyncQuery"))
-                .body("data.attributes.status", equalTo("PROCESSING"))
-                .body("data.attributes.result.contentLength", nullValue())
-                .body("data.attributes.result.responseBody", nullValue())
-                .body("data.attributes.result.httpStatus", nullValue())
-                .body("data.attributes.result.resultType", nullValue());
-
-        AsyncDelayStoreTransaction.sleep = false;
-        int i = 0;
-        while (i < 1000) {
-            Thread.sleep(10);
-            Response response = given()
-                    .accept("application/vnd.api+json")
-                    .get("/asyncQuery/edc4a871-dff2-4054-804e-d80075cf830f");
-
-            System.out.println(response.asString());
-            String outputResponse = response.jsonPath().getString("data.attributes.status");
-
-            // If Async Query is created and completed
-            if (outputResponse.equals("COMPLETE")) {
-             break;
-            }
-            i++;
-            if (i == 1000) {
-                fail("Async Query not completed.");
-            }
-        }
-    }
-    /**
      * Reset sleep delay flag after each test
      */
     @AfterEach

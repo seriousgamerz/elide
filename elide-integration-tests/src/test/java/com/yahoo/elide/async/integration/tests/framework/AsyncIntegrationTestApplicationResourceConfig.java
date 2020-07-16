@@ -110,11 +110,8 @@ public class AsyncIntegrationTestApplicationResourceConfig extends ResourceConfi
                 dictionary.bindTrigger(Invoice.class, "complete", CREATE, PRECOMMIT, invoiceCompletionHook);
                 dictionary.bindTrigger(Invoice.class, "complete", UPDATE, PRECOMMIT, invoiceCompletionHook);
 
-<<<<<<< HEAD
                 AsyncCleanerService.init(elide, 30, 5, 150, asyncQueryDao);
-=======
-                AsyncCleanerService.init(elide, 1, 5, 1, asyncQueryDao);
->>>>>>> a2a99722... code
+
                 bind(AsyncCleanerService.getInstance()).to(AsyncCleanerService.class);
             }
         });

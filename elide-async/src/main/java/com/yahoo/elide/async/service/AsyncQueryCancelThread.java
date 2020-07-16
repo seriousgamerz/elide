@@ -22,8 +22,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Runnable thread for cancelling AsyncQuery Transaction
- * beyond the max run time and if it has status CANCELLED.
+ * Runnable thread for cancelling AsyncQuery transactions
+ * beyond the max run time or if it has status CANCELLED.
  */
 @Slf4j
 @Data
@@ -33,7 +33,7 @@ public class AsyncQueryCancelThread implements Runnable {
     private int maxRunTimeSeconds;
     private Elide elide;
     private AsyncQueryDAO asyncQueryDao;
-
+    private TransactionRegistry transactionRegistry;
     @Override
     public void run() {
         cancelAsyncQuery();
@@ -41,46 +41,32 @@ public class AsyncQueryCancelThread implements Runnable {
 
     /**
      * This method cancels queries based on threshold.
-     * */
+     */
     protected void cancelAsyncQuery() {
 
         try {
-            TransactionRegistry transactionRegistry = elide.getTransactionRegistry();
-            //System.out.println(transactionRegistry.toString());
-            Collection<AsyncQuery> asyncQueryList = asyncQueryDao.getAsyncQueryAndResultCollection();
-            for (AsyncQuery obj : asyncQueryList) {
-                System.out.println(System.currentTimeMillis() + " ******** Async " + obj.getId()
-                        + " *** " + obj.getRequestId());
-                UUID uuid = UUID.nameUUIDFromBytes(obj.getRequestId().getBytes());
-                System.out.println(System.currentTimeMillis() + " **** running transaction "
-                        + transactionRegistry.getRunningTransaction(uuid));
+            transactionRegistry = elide.getTransactionRegistry();
+            Map<UUID, DataStoreTransaction> runningTransactionMap = transactionRegistry.getTransactionMap();
+            Collection<AsyncQuery> asyncQueryCollection = asyncQueryDao.getActiveAsyncQueryCollection();
 
-                Map<UUID, DataStoreTransaction> runningTransactionMap = transactionRegistry.getTransactionMap();
-
-                System.out.println(System.currentTimeMillis() + "runningTransactionMap " + runningTransactionMap);
-
-                for (Map.Entry<UUID, DataStoreTransaction> entry : runningTransactionMap.entrySet()) {
-                    System.out.println(System.currentTimeMillis() + " ******** To be Cancelled" + obj.getId());
-                    System.out.println(obj.getRequestId().trim());
-                    System.out.println(entry.getKey().toString().trim());
+            for (Map.Entry<UUID, DataStoreTransaction> entry : runningTransactionMap.entrySet()) {
+                for (AsyncQuery obj : asyncQueryCollection) {
                     if (obj.getRequestId().trim().equals(entry.getKey().toString().trim())) {
                         Date currentDate = new Date(System.currentTimeMillis());
                         long diffInMillies = Math.abs(obj.getUpdatedOn().getTime() - currentDate.getTime());
                         long diffInSecs = TimeUnit.SECONDS.convert(diffInMillies, TimeUnit.MILLISECONDS);
                         if (obj.getStatus().equals(QueryStatus.CANCELLED)) {
-                            System.out.println(System.currentTimeMillis() + " ******** Cancelled " + obj.getId());
+                        	log.debug("Async Query Cancelled: "+ obj.getId());
                             entry.getValue().cancel();
-                        } else if (diffInSecs >= maxRunTimeSeconds) {
-                            System.out.println(System.currentTimeMillis() + " ******** Cancelled " + obj.getId()
-                            + entry.getValue());
+                        } else if (diffInSecs > maxRunTimeSeconds) {
+                        	log.debug("Async Query Cancelled: "+ obj.getId());
                             entry.getValue().cancel();
-                            transactionRegistry.removeRunningTransaction(entry.getKey());
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception: {}", e);
         }
     }
 }

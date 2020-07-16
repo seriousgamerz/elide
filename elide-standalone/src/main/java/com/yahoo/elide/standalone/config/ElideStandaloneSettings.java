@@ -221,7 +221,7 @@ public interface ElideStandaloneSettings {
      *
      * @return Default: 60
      */
-    default Integer getAsyncMaxRunTimeMinutes() {
+    default Integer getAsyncMaxRunTimeSeconds() {
         return 60;
     }
 

@@ -25,7 +25,7 @@ import javax.inject.Inject;
 public class AsyncCleanerService {
 
     private final int defaultCleanupDelayMinutes = 360;
-    private final int maxCleanupInitialDelayMinutes = 100;
+    private final int maxInitialDelayMinutes = 100;
     private static AsyncCleanerService asyncCleanerService = null;
 
     @Inject
@@ -33,7 +33,7 @@ public class AsyncCleanerService {
             Integer cancelDelaySeconds, AsyncQueryDAO asyncQueryDao) {
 
         //If query is still running for twice than maxRunTime, then interrupt did not work due to host/app crash.
-        int queryRunTimeThresholdMinutes = (maxRunTimeSeconds * 2) / 60;
+        int queryRunTimeThresholdMinutes = Math.round((maxRunTimeSeconds * 2) / 60);
 
         // Setting up query cleaner that marks long running query as TIMEDOUT.
         ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor();
@@ -43,7 +43,7 @@ public class AsyncCleanerService {
         // Since there will be multiple hosts running the elide service,
         // setting up random delays to avoid all of them trying to cleanup at the same time.
         Random random = new Random();
-        int initialDelayMinutes = random.ints(0, maxCleanupInitialDelayMinutes).limit(1).findFirst().getAsInt();
+        int initialDelayMinutes = random.ints(0, maxInitialDelayMinutes).limit(1).findFirst().getAsInt();
         log.debug("Initial Delay for cleaner service is {}", initialDelayMinutes);
 
         //Having a delay of at least DEFAULT_CLEANUP_DELAY between two cleanup attempts.
@@ -52,13 +52,12 @@ public class AsyncCleanerService {
         cleaner.scheduleWithFixedDelay(cleanUpTask, initialDelayMinutes, Math.max(defaultCleanupDelayMinutes,
                 queryRunTimeThresholdMinutes), TimeUnit.MINUTES);
 
-        //Setting up query cancel service that cancels long running queries
+        //Setting up query cancel service that cancels long running queries based on status or runtime
         ScheduledExecutorService cancellation = Executors.newSingleThreadScheduledExecutor();
 
         AsyncQueryCancelThread cancelTask = new AsyncQueryCancelThread(maxRunTimeSeconds, elide, asyncQueryDao);
 
-        cancellation.scheduleWithFixedDelay(cancelTask, 10, cancelDelaySeconds, TimeUnit.SECONDS);
-
+        cancellation.scheduleWithFixedDelay(cancelTask, 0, cancelDelaySeconds, TimeUnit.SECONDS);
     }
 
     /**
