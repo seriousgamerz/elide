@@ -17,6 +17,7 @@ import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.data;
 import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.datum;
 import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.id;
 import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.linkage;
+import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.links;
 import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.patchOperation;
 import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.patchSet;
 import static com.yahoo.elide.contrib.testhelpers.jsonapi.JsonApiDSL.relation;
@@ -33,6 +34,7 @@ import com.yahoo.elide.contrib.testhelpers.graphql.GraphQLDSL;
 import com.yahoo.elide.core.HttpStatus;
 import com.yahoo.elide.spring.controllers.JsonApiController;
 import com.yahoo.elide.spring.models.ArtifactGroup;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
@@ -67,8 +69,17 @@ public class ControllerTest extends IntegrationTest {
                                                 attr("deprecated", false),
                                                 attr("description", "The code for this project")
                                         ),
+                                        links(
+                                                attr("self", "group/com.example.repository")
+                                        ),
                                         relationships(
-                                                relation("products")
+                                                relation(
+                                                        "products",
+                                                        links(
+                                                                attr("self", "group/com.example.repository/relationships/products"),
+                                                                attr("related", "group/com.example.repository/products")
+                                                        )
+                                                )
                                         )
                                 )
                         ).toJSON())
@@ -110,13 +121,23 @@ public class ControllerTest extends IntegrationTest {
                                                 attr("deprecated", false),
                                                 attr("description", "The code for this project")
                                         ),
+                                        links(
+                                                attr("self", "group/com.example.repository")
+                                        ),
                                         relationships(
-                                                relation("products")
+                                                relation(
+                                                        "products",
+                                                            links(
+                                                                    attr("self", "group/com.example.repository/relationships/products"),
+                                                                    attr("related", "group/com.example.repository/products")
+                                                            )
+
+                                                )
                                         )
                                 )
                         ).toJSON())
                 )
-                .statusCode(HttpStatus.SC_OK);
+                        .statusCode(HttpStatus.SC_OK);
     }
 
     @Test
@@ -192,8 +213,17 @@ public class ControllerTest extends IntegrationTest {
                                         attr("deprecated", false),
                                         attr("description", "")
                                 ),
+                                links(
+                                        attr("self", "group/com.example.repository2")
+                                ),
                                 relationships(
-                                        relation("products")
+                                        relation(
+                                                "products",
+                                                links(
+                                                        attr("self", "group/com.example.repository2/relationships/products"),
+                                                        attr("related", "group/com.example.repository2/products")
+                                                )
+                                        )
                                 )
                         )
                 ).toJSON()))
