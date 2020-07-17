@@ -56,7 +56,7 @@ public class ElideAsyncConfiguration {
     public AsyncExecutorService buildAsyncExecutorService(Elide elide, ElideConfigProperties settings,
             AsyncQueryDAO asyncQueryDao, EntityDictionary dictionary) {
         AsyncExecutorService.init(elide, settings.getAsync().getThreadPoolSize(),
-                settings.getAsync().getMaxRunTimeMinutes(), asyncQueryDao);
+                settings.getAsync().getMaxRunTimeSeconds(), asyncQueryDao);
         AsyncExecutorService asyncExecutorService = AsyncExecutorService.getInstance();
 
         // Binding AsyncQuery LifeCycleHook
@@ -82,8 +82,9 @@ public class ElideAsyncConfiguration {
     @ConditionalOnProperty(prefix = "elide.async", name = "cleanupEnabled", matchIfMissing = false)
     public AsyncCleanerService buildAsyncCleanerService(Elide elide, ElideConfigProperties settings,
             AsyncQueryDAO asyncQueryDao) {
-        AsyncCleanerService.init(elide, settings.getAsync().getMaxRunTimeMinutes(),
-                settings.getAsync().getQueryCleanupDays(), asyncQueryDao);
+        AsyncCleanerService.init(elide, settings.getAsync().getMaxRunTimeSeconds(),
+                settings.getAsync().getQueryCleanupDays(),
+                settings.getAsync().getQueryCancellationSeconds(), asyncQueryDao);
         return AsyncCleanerService.getInstance();
     }
 

@@ -133,7 +133,7 @@ public class ElideResourceConfig extends ResourceConfig {
                     bind(asyncQueryDao).to(AsyncQueryDAO.class);
 
                     AsyncExecutorService.init(elide, settings.getAsyncThreadSize(),
-                            settings.getAsyncMaxRunTimeMinutes(), asyncQueryDao);
+                            settings.getAsyncMaxRunTimeSeconds(), asyncQueryDao);
                     bind(AsyncExecutorService.getInstance()).to(AsyncExecutorService.class);
 
                     // Binding AsyncQuery LifeCycleHook
@@ -147,8 +147,9 @@ public class ElideResourceConfig extends ResourceConfig {
 
                     // Binding async cleanup service
                     if (settings.enableAsyncCleanup()) {
-                        AsyncCleanerService.init(elide, settings.getAsyncMaxRunTimeMinutes(),
-                                settings.getAsyncQueryCleanupDays(), asyncQueryDao);
+                        AsyncCleanerService.init(elide, settings.getAsyncMaxRunTimeSeconds(),
+                                settings.getAsyncQueryCleanupDays(),
+                                settings.getAsyncQueryCancelDelaySeconds(), asyncQueryDao);
                         bind(AsyncCleanerService.getInstance()).to(AsyncCleanerService.class);
                     }
                 }

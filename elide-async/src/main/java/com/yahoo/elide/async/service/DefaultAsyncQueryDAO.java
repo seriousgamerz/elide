@@ -163,6 +163,7 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
                     .type(AsyncQuery.class)
                     .build();
             AsyncQuery query = (AsyncQuery) tx.loadObject(asyncQueryCollection, asyncQueryId, scope);
+
             query.setResult(asyncQueryResult);
             query.setStatus(QueryStatus.COMPLETE);
             tx.save(query, scope);
@@ -186,6 +187,7 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<String, String>();
             RequestScope scope = new RequestScope("query", NO_VERSION, jsonApiDoc,
                     tx, null, queryParams, UUID.randomUUID(), elide.getElideSettings());
+
             result = action.execute(tx, scope);
             tx.flush(scope);
             tx.commit(scope);
@@ -194,5 +196,32 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             throw new IllegalStateException(e);
         }
         return result;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<AsyncQuery> getActiveAsyncQueryCollection() {
+        Collection<AsyncQuery> asyncQueryList = null;
+
+        log.debug("getActiveAsyncQueryCollection");
+        String filterExpression = "status=in=(" + QueryStatus.PROCESSING.toString() + ","
+                + QueryStatus.QUEUED.toString() + ")";
+
+        try {
+            FilterExpression filter = filterParser.parseFilterExpression(filterExpression,
+                     AsyncQuery.class, false);
+            asyncQueryList = (Collection<AsyncQuery>) executeInTransaction(dataStore, (tx, scope) -> {
+
+                EntityProjection asyncQueryCollection = EntityProjection.builder()
+                        .type(AsyncQuery.class)
+                        .filterExpression(filter)
+                        .build();
+                Iterable<Object> loaded = tx.loadObjects(asyncQueryCollection, scope);
+                return loaded;
+            });
+        } catch (Exception e) {
+            log.error("Exception: {}", e);
+        }
+        return asyncQueryList;
     }
 }

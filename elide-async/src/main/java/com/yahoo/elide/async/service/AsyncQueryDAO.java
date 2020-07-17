@@ -50,5 +50,11 @@ public interface AsyncQueryDAO {
      */
     public Collection<AsyncQuery> updateStatusAsyncQueryCollection(String filterExpression,
             QueryStatus status);
+    /**
+     * This method gets a collection of AsyncQuery and objects from database with status QUEUED/PROCESSING and
+     * returns the objects.
+     * @return query object list updated
+     */
+    public Collection<AsyncQuery> getActiveAsyncQueryCollection();
 
 }

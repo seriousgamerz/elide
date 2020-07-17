@@ -21,7 +21,7 @@ public class AsyncProperties extends ControllerProperties {
     /**
      * Default max query run time.
      */
-    private int maxRunTimeMinutes = 60;
+    private int maxRunTimeSeconds = 60;
 
     /**
      * Whether or not the cleanup is enabled.
@@ -32,6 +32,11 @@ public class AsyncProperties extends ControllerProperties {
      * Default retention of async query and results.
      */
     private int queryCleanupDays = 7;
+
+    /**
+     * Default cancel interval of async query.
+     */
+    private int queryCancellationSeconds = 300;
 
     /**
      * Whether or not to use the default implementation of AsyncQueryDAO.
