@@ -165,7 +165,9 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             AsyncQuery query = (AsyncQuery) tx.loadObject(asyncQueryCollection, asyncQueryId, scope);
 
             query.setResult(asyncQueryResult);
-            query.setStatus(QueryStatus.COMPLETE);
+            if (!(query.getStatus().equals(QueryStatus.CANCELLED))) {
+                query.setStatus(QueryStatus.COMPLETE);
+            }
             tx.save(query, scope);
             return query;
         });
@@ -204,7 +206,8 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
         Collection<AsyncQuery> asyncQueryList = null;
 
         log.debug("getActiveAsyncQueryCollection");
-        String filterExpression = "status=in=(" + QueryStatus.PROCESSING.toString() + ","
+        String filterExpression = "status=in=(" + QueryStatus.CANCELLED.toString() + ","
+                + QueryStatus.PROCESSING.toString() + ","
                 + QueryStatus.QUEUED.toString() + ")";
 
         try {

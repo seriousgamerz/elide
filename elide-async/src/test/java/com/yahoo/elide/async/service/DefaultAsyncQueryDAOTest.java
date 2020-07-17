@@ -111,6 +111,7 @@ public class DefaultAsyncQueryDAOTest {
     @Test
     public void testUpdateAsyncQueryResult() {
         when(tx.loadObject(any(), any(), any())).thenReturn(asyncQuery);
+        when(asyncQuery.getStatus()).thenReturn(QueryStatus.PROCESSING);
         asyncQueryDAO.updateAsyncQueryResult(asyncQueryResult, asyncQuery.getId());
         verify(dataStore, times(1)).beginTransaction();
         verify(tx, times(1)).save(any(AsyncQuery.class), any(RequestScope.class));
