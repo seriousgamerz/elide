@@ -119,4 +119,13 @@ public class DefaultAsyncQueryDAOTest {
         verify(asyncQuery, times(1)).setStatus(QueryStatus.COMPLETE);
 
     }
+
+    @Test
+    public void testGetActiveAsyncQueryCollection() {
+        Iterable<Object> loaded = Arrays.asList(asyncQuery, asyncQuery, asyncQuery);
+        when(tx.loadObjects(any(), any())).thenReturn(loaded);
+        asyncQueryDAO.getActiveAsyncQueryCollection("status=in=(CANCELLED,PROCESSING,QUEUED);createdOn=le='2020-03-23T02:02Z'");
+        verify(dataStore, times(1)).beginTransaction();
+        verify(tx, times(1)).loadObjects(any(), any());
+    }
 }

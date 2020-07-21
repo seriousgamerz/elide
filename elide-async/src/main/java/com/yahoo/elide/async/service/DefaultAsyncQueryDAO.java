@@ -202,13 +202,10 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Collection<AsyncQuery> getActiveAsyncQueryCollection() {
+    public Collection<AsyncQuery> getActiveAsyncQueryCollection(String filterExpression) {
         Collection<AsyncQuery> asyncQueryList = null;
 
         log.debug("getActiveAsyncQueryCollection");
-        String filterExpression = "status=in=(" + QueryStatus.CANCELLED.toString() + ","
-                + QueryStatus.PROCESSING.toString() + ","
-                + QueryStatus.QUEUED.toString() + ")";
 
         try {
             FilterExpression filter = filterParser.parseFilterExpression(filterExpression,
@@ -224,6 +221,7 @@ public class DefaultAsyncQueryDAO implements AsyncQueryDAO {
             });
         } catch (Exception e) {
             log.error("Exception: {}", e);
+            throw new IllegalStateException(e);
         }
         return asyncQueryList;
     }

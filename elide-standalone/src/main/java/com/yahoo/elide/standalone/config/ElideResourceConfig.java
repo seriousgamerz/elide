@@ -149,7 +149,7 @@ public class ElideResourceConfig extends ResourceConfig {
                     if (settings.enableAsyncCleanup()) {
                         AsyncCleanerService.init(elide, settings.getAsyncMaxRunTimeSeconds(),
                                 settings.getAsyncQueryCleanupDays(),
-                                settings.getAsyncQueryCancelDelaySeconds(), asyncQueryDao);
+                                settings.getAsyncQueryCancelSeconds(), asyncQueryDao);
                         bind(AsyncCleanerService.getInstance()).to(AsyncCleanerService.class);
                     }
                 }

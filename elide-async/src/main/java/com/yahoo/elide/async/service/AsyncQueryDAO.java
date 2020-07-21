@@ -53,8 +53,9 @@ public interface AsyncQueryDAO {
     /**
      * This method gets a collection of AsyncQuery and objects from database with status QUEUED/PROCESSING and
      * returns the objects.
+     * @param filterExpression filter expression to cancel AsyncQuery Objects based on
      * @return query object list updated
      */
-    public Collection<AsyncQuery> getActiveAsyncQueryCollection();
+    public Collection<AsyncQuery> getActiveAsyncQueryCollection(String filterExpression);
 
 }

@@ -6,6 +6,7 @@
 package com.yahoo.elide.async.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,7 +59,6 @@ public class AsyncQueryCancelThreadTest {
     @Test
     public void testCancelAsyncQuery() {
         cancelThread.cancelAsyncQuery();
-        verify(asyncQueryDao, times(1)).getActiveAsyncQueryCollection();
-        //verify(transactionRegistry, times(1)).getTransactionMap();
+        verify(asyncQueryDao, times(1)).getActiveAsyncQueryCollection(anyString());
     }
 }
