@@ -71,7 +71,7 @@ public class AsyncQueryThread implements Callable<AsyncQueryResult> {
     * @throws NoHttpResponseException
     */
     protected AsyncQueryResult processQuery() throws URISyntaxException, NoHttpResponseException {
-        UUID requestId = UUID.fromString(queryObj.getRequestId());
+        UUID requestId = queryObj.getRequestId();
 
         ElideResponse response = null;
         log.debug("AsyncQuery Object from request: {}", queryObj);

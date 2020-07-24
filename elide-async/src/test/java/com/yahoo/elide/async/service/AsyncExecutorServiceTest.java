@@ -30,6 +30,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -85,9 +86,10 @@ public class AsyncExecutorServiceTest {
         AsyncQuery queryObj = mock(AsyncQuery.class);
         String query = "/group?sort=commonName&fields%5Bgroup%5D=commonName,description";
         String id = "edc4a871-dff2-4054-804e-d80075cf827d";
+        UUID uuid = UUID.fromString("edc4a871-dff2-4054-804e-d80075cf827d");
         when(queryObj.getQuery()).thenReturn(query);
         when(queryObj.getId()).thenReturn(id);
-        when(queryObj.getRequestId()).thenReturn(id);
+        when(queryObj.getRequestId()).thenReturn(uuid);
         when(queryObj.getQueryType()).thenReturn(QueryType.JSONAPI_V1_0);
         when(queryObj.getAsyncAfterSeconds()).thenReturn(10);
         service.executeQuery(queryObj, testUser, NO_VERSION);

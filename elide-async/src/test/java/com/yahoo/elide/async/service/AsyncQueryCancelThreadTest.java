@@ -15,7 +15,6 @@ import com.yahoo.elide.Elide;
 import com.yahoo.elide.ElideSettingsBuilder;
 import com.yahoo.elide.async.models.AsyncQuery;
 import com.yahoo.elide.core.EntityDictionary;
-import com.yahoo.elide.core.TransactionRegistry;
 import com.yahoo.elide.core.datastore.inmemory.HashMapDataStore;
 import com.yahoo.elide.security.checks.Check;
 
@@ -31,7 +30,6 @@ public class AsyncQueryCancelThreadTest {
     private AsyncQueryCancelThread cancelThread;
     private Elide elide;
     private AsyncQueryDAO asyncQueryDao;
-    private TransactionRegistry transactionRegistry;
 
     @BeforeEach
     public void setupMocks() {
@@ -45,7 +43,6 @@ public class AsyncQueryCancelThreadTest {
                         .build());
 
         asyncQueryDao = mock(DefaultAsyncQueryDAO.class);
-        transactionRegistry = mock(TransactionRegistry.class);
         cancelThread = new AsyncQueryCancelThread(7, elide, asyncQueryDao);
     }
 
